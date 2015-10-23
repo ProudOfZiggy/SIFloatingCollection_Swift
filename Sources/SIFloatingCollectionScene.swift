@@ -106,7 +106,6 @@ class SIFloatingCollectionScene: SKScene {
         if mode == .Editing {
             return
         }
-        mode = .Moving
         
         if let touch = touches.first as? UITouch {
             let plin = touch.previousLocationInNode(self)
@@ -116,6 +115,12 @@ class SIFloatingCollectionScene: SKScene {
             let b = sqrt(pow(lin.x, 2) + pow(lin.y, 2))
             dx = b == 0 ? 0 : (dx / b)
             dy = b == 0 ? 0 : (dy / b)
+            
+            if dx == 0 && dy == 0 {
+                return
+            } else if mode != .Moving {
+                mode = .Moving
+            }
             
             for node in floatingNodes {
                 let w = node.frame.size.width / 2
