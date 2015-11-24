@@ -8,16 +8,16 @@
 
 import SpriteKit
 
-enum SIFloatingNodeState {
+public enum SIFloatingNodeState {
     case Normal
     case Selected
     case Removing
 }
 
-class SIFloatingNode: SKShapeNode {
+public class SIFloatingNode: SKShapeNode {
     private(set) var previousState: SIFloatingNodeState = .Normal
     private var _state: SIFloatingNodeState = .Normal
-    var state: SIFloatingNodeState {
+    public var state: SIFloatingNodeState {
         get {
             return _state
         }
@@ -30,9 +30,9 @@ class SIFloatingNode: SKShapeNode {
         }
     }
     
-    static let removingKey = "action.removing"
-    static let selectingKey = "action.selecting"
-    static let normalizeKey = "action.normalize"
+    public static let removingKey = "action.removing"
+    public static let selectingKey = "action.selecting"
+    public static let normalizeKey = "action.normalize"
     
     private func stateChaged() {
         var action: SKAction?
@@ -55,7 +55,7 @@ class SIFloatingNode: SKShapeNode {
         }
     }
     
-    override func removeFromParent() {
+    override public func removeFromParent() {
         if let action = removeAnimation() {
             runAction(action, completion: { () -> Void in
                 super.removeFromParent()
@@ -67,8 +67,8 @@ class SIFloatingNode: SKShapeNode {
     
     // MARK: -
     // MARK: Animations
-    func selectingAnimation() -> SKAction? {return nil}
-    func normalizeAnimation() -> SKAction? {return nil}
-    func removeAnimation() -> SKAction? {return nil}
-    func removingAnimation() -> SKAction? {return nil}
+    public func selectingAnimation() -> SKAction? {return nil}
+    public func normalizeAnimation() -> SKAction? {return nil}
+    public func removeAnimation() -> SKAction? {return nil}
+    public func removingAnimation() -> SKAction? {return nil}
 }
