@@ -6,13 +6,16 @@ SIFloatingCollection component uses SpriteKit for simulate physics similar to Ap
 
 ![Preview](http://media.giphy.com/media/3oEdv8UHKz9l788J4Q/giphy.gif)
 
-## Installation for Swift 1.x
+## Installation for Swift 2
 
 ####[CocoaPods](http://cocoapods.org)
 ```ruby
-pod 'SIFloatingCollectionSwift'
+pod 'SIFloatingCollectionSwift', '~> 1.1'
 ```
 
-## Installation for Swift 2 (Xcode 7 beta X) users
+## Installation for Swift 1.x users
 
-Download sources manually from swift_2 branch
+####[CocoaPods](http://cocoapods.org)
+```ruby
+pod 'SIFloatingCollectionSwift', '~> 1.0.0'
+```
