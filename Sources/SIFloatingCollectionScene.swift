@@ -33,13 +33,13 @@ public enum SIFloatingCollectionSceneMode {
 }
 
 public class SIFloatingCollectionScene: SKScene {
-    private(set) var magneticField = SKFieldNode.radialGravityField()
+    private(set) public var magneticField = SKFieldNode.radialGravityField()
     private(set) var mode: SIFloatingCollectionSceneMode = .Normal {
         didSet {
             modeUpdated()
         }
     }
-    private(set) var floatingNodes: [SIFloatingNode] = []
+    private(set) public var floatingNodes: [SIFloatingNode] = []
     
     private var touchPoint: CGPoint?
     private var touchStartedTime: NSTimeInterval?
