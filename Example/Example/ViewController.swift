@@ -31,7 +31,7 @@ class ViewController: UIViewController {
             action: "commitSelection"
         )
         
-        for i in 0..<20 {
+        for _ in 0..<20 {
             let node = BubbleNode.instantiate()
             floatingCollectionScene.addChild(node)
         }

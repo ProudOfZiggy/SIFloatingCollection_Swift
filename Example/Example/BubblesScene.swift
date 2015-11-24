@@ -14,7 +14,7 @@ extension CGFloat {
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
     
-    public static func random(#min: CGFloat, max: CGFloat) -> CGFloat {
+    public static func random(min min: CGFloat, max: CGFloat) -> CGFloat {
         return CGFloat.random() * (max - min) + min
     }
 }
@@ -44,7 +44,7 @@ class BubblesScene: SIFloatingCollectionScene {
     override func addChild(node: SKNode) {
         if node is BubbleNode {
             var x = CGFloat.random(min: -bottomOffset, max: -node.frame.size.width)
-            var y = CGFloat.random(
+            let y = CGFloat.random(
                 min: frame.size.height - bottomOffset - node.frame.size.height,
                 max: frame.size.height - topOffset - node.frame.size.height
             )
@@ -62,7 +62,7 @@ class BubblesScene: SIFloatingCollectionScene {
     
     func performCommitSelectionAnimation() {
         physicsWorld.speed = 0
-        var sortedNodes = sortedFloatingNodes()
+        let sortedNodes = sortedFloatingNodes()
         var actions: [SKAction] = []
         
         for node in sortedNodes {
@@ -83,9 +83,9 @@ class BubblesScene: SIFloatingCollectionScene {
     }
     
     func sortedFloatingNodes() -> [SIFloatingNode]! {
-        var sortedNodes = floatingNodes.sorted { (node: SIFloatingNode, nextNode: SIFloatingNode) -> Bool in
-            let distance = distanceBetweenPoints(node.position, self.magneticField.position)
-            let nextDistance = distanceBetweenPoints(nextNode.position, self.magneticField.position)
+        let sortedNodes = floatingNodes.sort { (node: SIFloatingNode, nextNode: SIFloatingNode) -> Bool in
+            let distance = distanceBetweenPoints(node.position, secondPoint: self.magneticField.position)
+            let nextDistance = distanceBetweenPoints(nextNode.position, secondPoint: self.magneticField.position)
             return distance < nextDistance && node.state != .Selected
         }
         return sortedNodes
@@ -93,7 +93,7 @@ class BubblesScene: SIFloatingCollectionScene {
     
     func actionForFloatingNode(node: SIFloatingNode!) -> SKAction {
         let action = SKAction.runBlock({ () -> Void in
-            if let index = find(self.floatingNodes, node) {
+            if let index = self.floatingNodes.indexOf(node) {
                 self.removeFloatinNodeAtIndex(index)
                 if node.state == .Selected {
                     self.throwNode(

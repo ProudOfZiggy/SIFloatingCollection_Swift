@@ -177,6 +177,7 @@
 		24756D031B7F3F03004C8AF5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = ProudOfZiggy;
 				TargetAttributes = {
@@ -436,6 +437,7 @@
 				24756D2C1B7F3F03004C8AF5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		24756D2D1B7F3F03004C8AF5 /* Build configuration list for PBXNativeTarget "ExampleTests" */ = {
 			isa = XCConfigurationList;
@@ -444,6 +446,7 @@
 				24756D2F1B7F3F03004C8AF5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
