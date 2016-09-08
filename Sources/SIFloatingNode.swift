@@ -9,15 +9,15 @@
 import SpriteKit
 
 public enum SIFloatingNodeState {
-    case Normal
-    case Selected
-    case Removing
+    case normal
+    case selected
+    case removing
 }
 
-public class SIFloatingNode: SKShapeNode {
-    private(set) var previousState: SIFloatingNodeState = .Normal
-    private var _state: SIFloatingNodeState = .Normal
-    public var state: SIFloatingNodeState {
+open class SIFloatingNode: SKShapeNode {
+    fileprivate(set) var previousState: SIFloatingNodeState = .normal
+    fileprivate var _state: SIFloatingNodeState = .normal
+    open var state: SIFloatingNodeState {
         get {
             return _state
         }
@@ -30,34 +30,34 @@ public class SIFloatingNode: SKShapeNode {
         }
     }
     
-    public static let removingKey = "action.removing"
-    public static let selectingKey = "action.selecting"
-    public static let normalizeKey = "action.normalize"
+    open static let removingKey = "action.removing"
+    open static let selectingKey = "action.selecting"
+    open static let normalizeKey = "action.normalize"
     
-    private func stateChaged() {
+    fileprivate func stateChaged() {
         var action: SKAction?
         var actionKey: String?
         
         switch state {
-        case .Normal:
+        case .normal:
             action = normalizeAnimation()
             actionKey = SIFloatingNode.normalizeKey
-        case .Selected:
+        case .selected:
             action = selectingAnimation()
             actionKey = SIFloatingNode.selectingKey
-        case .Removing:
+        case .removing:
             action = removingAnimation()
             actionKey = SIFloatingNode.removingKey
         }
         
-        if let a = action, ak = actionKey {
-            runAction(a, withKey: ak)
+        if let a = action, let ak = actionKey {
+            run(a, withKey: ak)
         }
     }
     
-    override public func removeFromParent() {
+    override open func removeFromParent() {
         if let action = removeAnimation() {
-            runAction(action, completion: { () -> Void in
+            run(action, completion: { () -> Void in
                 super.removeFromParent()
             })
         } else {
@@ -67,8 +67,8 @@ public class SIFloatingNode: SKShapeNode {
     
     // MARK: -
     // MARK: Animations
-    public func selectingAnimation() -> SKAction? {return nil}
-    public func normalizeAnimation() -> SKAction? {return nil}
-    public func removeAnimation() -> SKAction? {return nil}
-    public func removingAnimation() -> SKAction? {return nil}
+    open func selectingAnimation() -> SKAction? {return nil}
+    open func normalizeAnimation() -> SKAction? {return nil}
+    open func removeAnimation() -> SKAction? {return nil}
+    open func removingAnimation() -> SKAction? {return nil}
 }

@@ -20,43 +20,43 @@ class BubbleNode: SIFloatingNode {
         return node
     }
     
-    class func configureNode(node: BubbleNode!) {
-        let boundingBox = CGPathGetBoundingBox(node.path);
-        let radius = boundingBox.size.width / 2.0;
+    class func configureNode(_ node: BubbleNode!) {
+        let boundingBox = node.path?.boundingBox;
+        let radius = (boundingBox?.size.width)! / 2.0;
         node.physicsBody = SKPhysicsBody(circleOfRadius: radius + 1.5)
-        node.fillColor = SKColor.blackColor()
+        node.fillColor = SKColor.black
         node.strokeColor = node.fillColor
         
         node.labelNode.text = "Hello"
-        node.labelNode.position = CGPointZero
-        node.labelNode.fontColor = SKColor.whiteColor()
+        node.labelNode.position = CGPoint.zero
+        node.labelNode.fontColor = SKColor.white
         node.labelNode.fontSize = 10
-        node.labelNode.userInteractionEnabled = false
-        node.labelNode.verticalAlignmentMode = .Center
-        node.labelNode.horizontalAlignmentMode = .Center
+        node.labelNode.isUserInteractionEnabled = false
+        node.labelNode.verticalAlignmentMode = .center
+        node.labelNode.horizontalAlignmentMode = .center
         node.addChild(node.labelNode)
     }
     
     override func selectingAnimation() -> SKAction? {
-        removeActionForKey(BubbleNode.removingKey)
-        return SKAction.scaleTo(1.3, duration: 0.2)
+        removeAction(forKey: BubbleNode.removingKey)
+        return SKAction.scale(to: 1.3, duration: 0.2)
     }
     
     override func normalizeAnimation() -> SKAction? {
-        removeActionForKey(BubbleNode.removingKey)
-        return SKAction.scaleTo(1, duration: 0.2)
+        removeAction(forKey: BubbleNode.removingKey)
+        return SKAction.scale(to: 1, duration: 0.2)
     }
     
     override func removeAnimation() -> SKAction? {
-        removeActionForKey(BubbleNode.removingKey)
-        return SKAction.fadeOutWithDuration(0.2)
+        removeAction(forKey: BubbleNode.removingKey)
+        return SKAction.fadeOut(withDuration: 0.2)
     }
     
     override func removingAnimation() -> SKAction {
-        let pulseUp = SKAction.scaleTo(xScale + 0.13, duration: 0)
-        let pulseDown = SKAction.scaleTo(xScale, duration: 0.3)
+        let pulseUp = SKAction.scale(to: xScale + 0.13, duration: 0)
+        let pulseDown = SKAction.scale(to: xScale, duration: 0.3)
         let pulse = SKAction.sequence([pulseUp, pulseDown])
-        let repeatPulse = SKAction.repeatActionForever(pulse)
+        let repeatPulse = SKAction.repeatForever(pulse)
         return repeatPulse
     }
 }

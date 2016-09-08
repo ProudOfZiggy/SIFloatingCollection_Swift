@@ -10,34 +10,34 @@ import UIKit
 import SpriteKit
 
 class ViewController: UIViewController {
-    private var skView: SKView!
-    private var floatingCollectionScene: BubblesScene!
+    fileprivate var skView: SKView!
+    fileprivate var floatingCollectionScene: BubblesScene!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        skView = SKView(frame: UIScreen.mainScreen().bounds)
-        skView.backgroundColor = SKColor.whiteColor()
+        skView = SKView(frame: UIScreen.main.bounds)
+        skView.backgroundColor = SKColor.white
         view.addSubview(skView)
         
         floatingCollectionScene = BubblesScene(size: skView.bounds.size)
-        let navBarHeight = CGRectGetHeight(navigationController!.navigationBar.frame)
-        let statusBarHeight = CGRectGetHeight(UIApplication.sharedApplication().statusBarFrame)
+        let navBarHeight = navigationController!.navigationBar.frame.height
+        let statusBarHeight = UIApplication.shared.statusBarFrame.height
         floatingCollectionScene.topOffset = navBarHeight + statusBarHeight
         skView.presentScene(floatingCollectionScene)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .Done,
+            barButtonSystemItem: .done,
             target: self,
-            action: "commitSelection"
+            action: #selector(ViewController.commitSelection)
         )
         
         for _ in 0..<20 {
             let node = BubbleNode.instantiate()
-            floatingCollectionScene.addChild(node)
+            floatingCollectionScene.addChild(node!)
         }
     }
     
-    dynamic private func commitSelection() {
+    dynamic fileprivate func commitSelection() {
         floatingCollectionScene.performCommitSelectionAnimation()
     }
 }
