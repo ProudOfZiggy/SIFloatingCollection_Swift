@@ -15,26 +15,21 @@ public enum SIFloatingNodeState {
 }
 
 open class SIFloatingNode: SKShapeNode {
-    fileprivate(set) var previousState: SIFloatingNodeState = .normal
-    fileprivate var _state: SIFloatingNodeState = .normal
-    open var state: SIFloatingNodeState {
-        get {
-            return _state
-        }
-        set {
-            if _state != newValue {
-                previousState = _state
-                _state = newValue
-                stateChaged()
+    private(set) var previousState: SIFloatingNodeState = .normal
+    public var state: SIFloatingNodeState = .normal {
+        didSet {
+            if state != oldValue {
+                previousState = oldValue
+                stateChanged()
             }
         }
     }
     
-    open static let removingKey = "action.removing"
-    open static let selectingKey = "action.selecting"
-    open static let normalizeKey = "action.normalize"
+    private static let removingKey = "action.removing"
+    private static let selectingKey = "action.selecting"
+    private static let normalizeKey = "action.normalize"
     
-    fileprivate func stateChaged() {
+    private func stateChanged() {
         var action: SKAction?
         var actionKey: String?
         
@@ -50,16 +45,17 @@ open class SIFloatingNode: SKShapeNode {
             actionKey = SIFloatingNode.removingKey
         }
         
-        if let a = action, let ak = actionKey {
-            run(a, withKey: ak)
+        if let action = action, let actionKey = actionKey {
+            removeAction(forKey: actionKey)
+            run(action, withKey: actionKey)
         }
     }
     
     override open func removeFromParent() {
         if let action = removeAnimation() {
-            run(action, completion: { () -> Void in
+            run(action) {
                 super.removeFromParent()
-            })
+            }
         } else {
             super.removeFromParent()
         }

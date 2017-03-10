@@ -32,6 +32,7 @@ class BubblesScene: SIFloatingCollectionScene {
         backgroundColor = SKColor.white
         scaleMode = .aspectFill
         allowMultipleSelection = false
+        allowEditing = true
         var bodyFrame = frame
         bodyFrame.size.width = CGFloat(magneticField.minimumRadius)
         bodyFrame.origin.x -= bodyFrame.size.width / 2
@@ -65,7 +66,7 @@ class BubblesScene: SIFloatingCollectionScene {
         let sortedNodes = sortedFloatingNodes()
         var actions: [SKAction] = []
         
-        for node in sortedNodes! {
+        for node in sortedNodes {
             node.physicsBody = nil
             let action = actionForFloatingNode(node)
             actions.append(action)
@@ -73,39 +74,36 @@ class BubblesScene: SIFloatingCollectionScene {
         run(SKAction.sequence(actions))
     }
     
-    func throwNode(_ node: SKNode, toPoint: CGPoint, completion block: (() -> Void)!) {
+    func throwNode(_ node: SKNode, toPoint: CGPoint, completion block: @escaping (() -> Void)) {
         node.removeAllActions()
         let movingXAction = SKAction.moveTo(x: toPoint.x, duration: 0.2)
         let movingYAction = SKAction.moveTo(y: toPoint.y, duration: 0.4)
         let resize = SKAction.scale(to: 0.3, duration: 0.4)
         let throwAction = SKAction.group([movingXAction, movingYAction, resize])
-        node.run(throwAction)
+        node.run(throwAction, completion: block)
     }
     
-    func sortedFloatingNodes() -> [SIFloatingNode]! {
-        let sortedNodes = floatingNodes.sorted { (node: SIFloatingNode, nextNode: SIFloatingNode) -> Bool in
-            let distance = distanceBetweenPoints(node.position, secondPoint: self.magneticField.position)
-            let nextDistance = distanceBetweenPoints(nextNode.position, secondPoint: self.magneticField.position)
+    func sortedFloatingNodes() -> [SIFloatingNode] {
+        return floatingNodes.sorted { (node: SIFloatingNode, nextNode: SIFloatingNode) -> Bool in
+            let distance = node.position.distance(from: magneticField.position)
+            let nextDistance = nextNode.position.distance(from: magneticField.position)
             return distance < nextDistance && node.state != .selected
         }
-        return sortedNodes
     }
     
     func actionForFloatingNode(_ node: SIFloatingNode!) -> SKAction {
-        let action = SKAction.run({ () -> Void in
+        let action = SKAction.run { [unowned self] () -> Void in
             if let index = self.floatingNodes.index(of: node) {
-                self.removeFloatinNodeAtIndex(index)
+                self.removeFloatingNode(at: index)
+                
                 if node.state == .selected {
-                    self.throwNode(
-                        node,
-                        toPoint: CGPoint(x: self.size.width / 2, y: self.size.height + 40),
-                        completion: {
-                            node.removeFromParent()
-                        }
-                    )
+                    let destinationPoint = CGPoint(x: self.size.width / 2, y: self.size.height + 40)
+                    (node as? BubbleNode)?.throw(to: destinationPoint) {
+                        node.removeFromParent()
+                    }
                 }
             }
-        })
+        }
         return action
     }
 }

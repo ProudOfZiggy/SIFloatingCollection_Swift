@@ -38,17 +38,14 @@ class BubbleNode: SIFloatingNode {
     }
     
     override func selectingAnimation() -> SKAction? {
-        removeAction(forKey: BubbleNode.removingKey)
         return SKAction.scale(to: 1.3, duration: 0.2)
     }
     
     override func normalizeAnimation() -> SKAction? {
-        removeAction(forKey: BubbleNode.removingKey)
         return SKAction.scale(to: 1, duration: 0.2)
     }
     
     override func removeAnimation() -> SKAction? {
-        removeAction(forKey: BubbleNode.removingKey)
         return SKAction.fadeOut(withDuration: 0.2)
     }
     
@@ -58,5 +55,14 @@ class BubbleNode: SIFloatingNode {
         let pulse = SKAction.sequence([pulseUp, pulseDown])
         let repeatPulse = SKAction.repeatForever(pulse)
         return repeatPulse
+    }
+    
+    func `throw`(to point: CGPoint, completion block: @escaping (() -> Void)) {
+        removeAllActions()
+        let movingXAction = SKAction.moveTo(x: point.x, duration: 0.2)
+        let movingYAction = SKAction.moveTo(y: point.y, duration: 0.4)
+        let resize = SKAction.scale(to: 0.3, duration: 0.4)
+        let throwAction = SKAction.group([movingXAction, movingYAction, resize])
+        run(throwAction, completion: block)
     }
 }

@@ -8,22 +8,25 @@
 
 import SpriteKit
 
-public func distanceBetweenPoints(_ firstPoint: CGPoint, secondPoint: CGPoint) -> CGFloat {
-    return hypot(secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y)
+extension CGPoint {
+    
+    func distance(from point: CGPoint) -> CGFloat {
+        return hypot(point.x - self.x, point.y - self.y)
+    }
 }
 
 @objc public protocol SIFloatingCollectionSceneDelegate {
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldSelectFloatingNodeAtIndex index: Int) -> Bool
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didSelectFloatingNodeAtIndex index: Int)
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldSelectFloatingNodeAt index: Int) -> Bool
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didSelectFloatingNodeAt index: Int)
     
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldDeselectFloatingNodeAtIndex index: Int) -> Bool
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didDeselectFloatingNodeAtIndex index: Int)
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldDeselectFloatingNodeAt index: Int) -> Bool
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didDeselectFloatingNodeAt index: Int)
     
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, startedRemovingOfFloatingNodeAtIndex index: Int)
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, canceledRemovingOfFloatingNodeAtIndex index: Int)
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, startedRemovingOfFloatingNodeAt index: Int)
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, canceledRemovingOfFloatingNodeAt index: Int)
     
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldRemoveFloatingNodeAtIndex index: Int) -> Bool
-    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didRemoveFloatingNodeAtIndex index: Int)
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, shouldRemoveFloatingNodeAt index: Int) -> Bool
+    @objc optional func floatingScene(_ scene: SIFloatingCollectionScene, didRemoveFloatingNodeAt index: Int)
 }
 
 public enum SIFloatingCollectionSceneMode {
@@ -33,24 +36,25 @@ public enum SIFloatingCollectionSceneMode {
 }
 
 open class SIFloatingCollectionScene: SKScene {
-    fileprivate(set) open var magneticField = SKFieldNode.radialGravityField()
-    fileprivate(set) var mode: SIFloatingCollectionSceneMode = .normal {
+    private(set) var magneticField = SKFieldNode.radialGravityField()
+    private(set) var mode: SIFloatingCollectionSceneMode = .normal {
         didSet {
             modeUpdated()
         }
     }
-    fileprivate(set) open var floatingNodes: [SIFloatingNode] = []
+    private(set) var floatingNodes: [SIFloatingNode] = []
     
-    fileprivate var touchPoint: CGPoint?
-    fileprivate var touchStartedTime: TimeInterval?
-    fileprivate var removingStartedTime: TimeInterval?
+    private var touchPoint: CGPoint?
+    private var touchStartedTime: TimeInterval?
+    private var removingStartedTime: TimeInterval?
     
-    open var timeToStartRemove: TimeInterval = 0.7
+    open var timeToStartRemoving: TimeInterval = 0.7
     open var timeToRemove: TimeInterval = 2
     open var allowEditing = false
     open var allowMultipleSelection = true
     open var restrictedToBounds = true
     open var pushStrength: CGFloat = 10000
+    
     open weak var floatingDelegate: SIFloatingCollectionSceneDelegate?
     
     override open func didMove(to view: SKView) {
@@ -62,31 +66,38 @@ open class SIFloatingCollectionScene: SKScene {
     // MARK: Frame Updates
     //@todo refactoring
     override open func update(_ currentTime: TimeInterval) {
-        let _ = floatingNodes.map { (node: SKNode) -> Void in
-            let distanceFromCenter = distanceBetweenPoints(self.magneticField.position, secondPoint: node.position)
-            node.physicsBody?.linearDamping = distanceFromCenter > 100 ? 2 : 2 + ((100 - distanceFromCenter) / 10)
+        floatingNodes.forEach { (node) in
+            let distanceFromCenter = self.magneticField.position.distance(from: node.position)
+            node.physicsBody?.linearDamping = 2
+            
+            if distanceFromCenter <= 100 {
+                node.physicsBody?.linearDamping += ((100 - distanceFromCenter) / 10)
+            }
         }
-        
+
         if mode == .moving || !allowEditing {
             return
         }
         
-        if let tStartTime = touchStartedTime, let tPoint = touchPoint {
-            let dTime = currentTime - tStartTime
-            if dTime >= timeToStartRemove {
-                touchStartedTime = nil
-                if let node = atPoint(tPoint) as? SIFloatingNode {
+        if let touchStartedTime = touchStartedTime, let touchPoint = touchPoint {
+            let deltaTime = currentTime - touchStartedTime
+            if deltaTime >= timeToStartRemoving {
+                self.touchStartedTime = nil
+                
+                if let node = atPoint(touchPoint) as? SIFloatingNode {
                     removingStartedTime = currentTime
                     startRemovingNode(node)
                 }
             }
-        } else if mode == .editing, let tRemovingTime = removingStartedTime, let tPoint = touchPoint {
-            let dTime = currentTime - tRemovingTime
-            if dTime >= timeToRemove {
-                removingStartedTime = nil
-                if let node = atPoint(tPoint) as? SIFloatingNode {
+        } else if mode == .editing, let removingStartedTime = removingStartedTime, let touchPoint = touchPoint {
+            let deltaTime = currentTime - removingStartedTime
+            
+            if deltaTime >= timeToRemove {
+                self.removingStartedTime = nil
+                
+                if let node = atPoint(touchPoint) as? SIFloatingNode {
                     if let index = floatingNodes.index(of: node) {
-                        removeFloatinNodeAtIndex(index)
+                        removeFloatingNode(at: index)
                     }
                 }
             }
@@ -126,16 +137,16 @@ open class SIFloatingCollectionScene: SKScene {
                 let w = node.frame.size.width / 2
                 let h = node.frame.size.height / 2
                 var direction = CGVector(
-                    dx: CGFloat(self.pushStrength) * dx,
-                    dy: CGFloat(self.pushStrength) * dy
+                    dx: pushStrength * dx,
+                    dy: pushStrength * dy
                 )
                 
                 if restrictedToBounds {
-                    if !(-w...size.width + w ~= node.position.x) && (node.position.x * dx > 0) {
+                    if !(-w...(size.width + w) ~= node.position.x) && (node.position.x * dx) > 0 {
                         direction.dx = 0
                     }
                     
-                    if !(-h...size.height + h ~= node.position.y) && (node.position.y * dy > 0) {
+                    if !(-h...(size.height + h) ~= node.position.y) && (node.position.y * dy) > 0 {
                         direction.dy = 0
                     }
                 }
@@ -145,9 +156,9 @@ open class SIFloatingCollectionScene: SKScene {
     }
     
     override open func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if mode != .moving, let touch = touchPoint {
-            if let node = atPoint(touch) as? SIFloatingNode {
-                updateNodeState(node)
+        if mode != .moving, let touchPoint = touchPoint {
+            if let node = atPoint(touchPoint) as? SIFloatingNode {
+                updateState(of: node)
             }
         }
         mode = .normal
@@ -159,40 +170,33 @@ open class SIFloatingCollectionScene: SKScene {
     
     // MARK: -
     // MARK: Nodes Manipulation
-    fileprivate func cancelRemovingNode(_ node: SIFloatingNode!) {
+    private func cancelRemovingNode(_ node: SIFloatingNode!) {
         mode = .normal
         node.physicsBody?.isDynamic = true
         node.state = node.previousState
+        
         if let index = floatingNodes.index(of: node) {
-            floatingDelegate?.floatingScene?(self, canceledRemovingOfFloatingNodeAtIndex: index)
+            floatingDelegate?.floatingScene?(self, canceledRemovingOfFloatingNodeAt: index)
         }
     }
     
-    open func floatingNodeAtIndex(_ index: Int) -> SIFloatingNode? {
-        if index < floatingNodes.count && index >= 0 {
+    open func floatingNode(at index: Int) -> SIFloatingNode? {
+        if 0..<floatingNodes.count ~= index {
             return floatingNodes[index]
         }
         return nil
     }
     
     open func indexOfSelectedNode() -> Int? {
-        var index: Int?
-        
-        for (idx, node) in floatingNodes.enumerated() {
-            if node.state == .selected {
-                index = idx
-                break
-            }
-        }
-        return index
+        return indexesOfSelectedNodes().first
     }
     
-    open func indexesOfSelectedNodes() -> [Int]! {
+    open func indexesOfSelectedNodes() -> [Int] {
         var indexes: [Int] = []
         
-        for (idx, node) in floatingNodes.enumerated() {
+        for (i, node) in floatingNodes.enumerated() {
             if node.state == .selected {
-                indexes.append(idx)
+                indexes.append(i)
             }
         }
         return indexes
@@ -208,39 +212,41 @@ open class SIFloatingCollectionScene: SKScene {
         return currentNode
     }
     
-    open func removeFloatinNodeAtIndex(_ index: Int) {
-        if shouldRemoveNodeAtIndex(index) {
+    open func removeFloatingNode(at index: Int) {
+        if shouldRemoveNode(at: index) {
             let node = floatingNodes[index]
             floatingNodes.remove(at: index)
             node.removeFromParent()
-            floatingDelegate?.floatingScene?(self, didRemoveFloatingNodeAtIndex: index)
+            floatingDelegate?.floatingScene?(self, didRemoveFloatingNodeAt: index)
         }
     }
     
-    fileprivate func startRemovingNode(_ node: SIFloatingNode!) {
+    private func startRemovingNode(_ node: SIFloatingNode) {
         mode = .editing
         node.physicsBody?.isDynamic = false
         node.state = .removing
+        
         if let index = floatingNodes.index(of: node) {
-            floatingDelegate?.floatingScene?(self, startedRemovingOfFloatingNodeAtIndex: index)
+            floatingDelegate?.floatingScene?(self, startedRemovingOfFloatingNodeAt: index)
         }
     }
     
-    fileprivate func updateNodeState(_ node: SIFloatingNode!) {
+    private func updateState(of node: SIFloatingNode) {
         if let index = floatingNodes.index(of: node) {
             switch node.state {
             case .normal:
-                if shouldSelectNodeAtIndex(index) {
+                if shouldSelectNode(at: index) {
                     if !allowMultipleSelection, let selectedIndex = indexOfSelectedNode() {
-                        updateNodeState(floatingNodes[selectedIndex])
+                        let node = floatingNodes[selectedIndex]
+                        updateState(of: node)
                     }
                     node.state = .selected
-                    floatingDelegate?.floatingScene?(self, didSelectFloatingNodeAtIndex: index)
+                    floatingDelegate?.floatingScene?(self, didSelectFloatingNodeAt: index)
                 }
             case .selected:
-                if shouldDeselectNodeAtIndex(index) {
+                if shouldDeselectNode(at: index) {
                     node.state = .normal
-                    floatingDelegate?.floatingScene?(self, didDeselectFloatingNodeAtIndex: index)
+                    floatingDelegate?.floatingScene?(self, didDeselectFloatingNodeAt: index)
                 }
             case .removing:
                 cancelRemovingNode(node)
@@ -251,14 +257,14 @@ open class SIFloatingCollectionScene: SKScene {
     // MARK: -
     // MARK: Configuration
     override open func addChild(_ node: SKNode) {
-        if let child = node as? SIFloatingNode {
-            configureNode(child)
-            floatingNodes.append(child)
+        if let newNode = node as? SIFloatingNode {
+            configureNode(newNode)
+            floatingNodes.append(newNode)
         }
         super.addChild(node)
     }
     
-    fileprivate func configure() {
+    private func configure() {
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
         magneticField = SKFieldNode.radialGravityField()
@@ -269,13 +275,9 @@ open class SIFloatingCollectionScene: SKScene {
         addChild(magneticField)
     }
     
-    fileprivate func configureNode(_ node: SIFloatingNode!) {
+    private func configureNode(_ node: SIFloatingNode!) {
         if node.physicsBody == nil {
-            var path: CGPath = CGMutablePath()
-    
-            if node.path != nil {
-                path = node.path!
-            }
+            let path = node.path ?? CGMutablePath()
             node.physicsBody = SKPhysicsBody(polygonFrom: path)
         }
         node.physicsBody?.isDynamic = true
@@ -286,7 +288,7 @@ open class SIFloatingCollectionScene: SKScene {
         node.physicsBody?.linearDamping = 3
     }
     
-    fileprivate func modeUpdated() {
+    private func modeUpdated() {
         switch mode {
         case .normal, .moving:
             touchStartedTime = nil
@@ -298,9 +300,9 @@ open class SIFloatingCollectionScene: SKScene {
     
     // MARK: -
     // MARK: Floating Delegate Helpers
-    fileprivate func shouldRemoveNodeAtIndex(_ index: Int) -> Bool {
-        if 0...floatingNodes.count - 1 ~= index {
-            if let shouldRemove = floatingDelegate?.floatingScene?(self, shouldRemoveFloatingNodeAtIndex: index) {
+    private func shouldRemoveNode(at index: Int) -> Bool {
+        if 0..<floatingNodes.count ~= index {
+            if let shouldRemove = floatingDelegate?.floatingScene?(self, shouldRemoveFloatingNodeAt: index) {
                 return shouldRemove
             }
             return true
@@ -308,15 +310,15 @@ open class SIFloatingCollectionScene: SKScene {
         return false
     }
     
-    fileprivate func shouldSelectNodeAtIndex(_ index: Int) -> Bool {
-        if let shouldSelect = floatingDelegate?.floatingScene?(self, shouldSelectFloatingNodeAtIndex: index) {
+    private func shouldSelectNode(at index: Int) -> Bool {
+        if let shouldSelect = floatingDelegate?.floatingScene?(self, shouldSelectFloatingNodeAt: index) {
             return shouldSelect
         }
         return true
     }
     
-    fileprivate func shouldDeselectNodeAtIndex(_ index: Int) -> Bool {
-        if let shouldDeselect = floatingDelegate?.floatingScene?(self, shouldDeselectFloatingNodeAtIndex: index) {
+    private func shouldDeselectNode(at index: Int) -> Bool {
+        if let shouldDeselect = floatingDelegate?.floatingScene?(self, shouldDeselectFloatingNodeAt: index) {
             return shouldDeselect
         }
         return true
