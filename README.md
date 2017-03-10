@@ -17,5 +17,5 @@ pod 'SIFloatingCollection'
 
 ####[CocoaPods](http://cocoapods.org)
 ```ruby
-pod 'SIFloatingCollection', :branch => 'swift_2_1'
+pod 'SIFloatingCollection', '2.1'
 ```
