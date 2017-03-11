@@ -28,16 +28,26 @@ class ViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .done,
             target: self,
-            action: #selector(ViewController.commitSelection)
+            action: #selector(commitSelection)
+        )
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addBubble)
         )
         
         for _ in 0..<20 {
-            let node = BubbleNode.instantiate()
-            floatingCollectionScene.addChild(node)
+            addBubble()
         }
     }
     
-    dynamic fileprivate func commitSelection() {
+    func addBubble() {
+        let newNode = BubbleNode.instantiate()
+        floatingCollectionScene.addChild(newNode)
+    }
+    
+    func commitSelection() {
         floatingCollectionScene.performCommitSelectionAnimation()
     }
 }

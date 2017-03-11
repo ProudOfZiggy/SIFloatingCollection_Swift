@@ -62,6 +62,7 @@ class BubblesScene: SIFloatingCollectionScene {
     }
     
     func performCommitSelectionAnimation() {
+        let currentPhysicsSpeed = physicsWorld.speed
         physicsWorld.speed = 0
         let sortedNodes = sortedFloatingNodes()
         var actions: [SKAction] = []
@@ -71,7 +72,9 @@ class BubblesScene: SIFloatingCollectionScene {
             let action = actionForFloatingNode(node)
             actions.append(action)
         }
-        run(SKAction.sequence(actions))
+        run(SKAction.sequence(actions)) { [weak self] in
+            self?.physicsWorld.speed = currentPhysicsSpeed
+        }
     }
     
     func throwNode(_ node: SKNode, toPoint: CGPoint, completion block: @escaping (() -> Void)) {
