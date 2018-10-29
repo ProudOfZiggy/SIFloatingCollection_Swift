@@ -42,12 +42,12 @@ class ViewController: UIViewController {
         }
     }
     
-    func addBubble() {
+    @objc func addBubble() {
         let newNode = BubbleNode.instantiate()
         floatingCollectionScene.addChild(newNode)
     }
     
-    func commitSelection() {
+    @objc func commitSelection() {
         floatingCollectionScene.performCommitSelectionAnimation()
     }
 }
