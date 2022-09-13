@@ -44,6 +44,7 @@
 		24756D321B7F3F24004C8AF5 /* SIFloatingNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SIFloatingNode.swift; sourceTree = "<group>"; };
 		24756D351B7F3F5D004C8AF5 /* BubbleNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BubbleNode.swift; sourceTree = "<group>"; };
 		24756D371B7F3FAD004C8AF5 /* BubblesScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BubblesScene.swift; sourceTree = "<group>"; };
+		4BDF483528D0137B00BFA5BE /* SIFloatingCollection */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SIFloatingCollection; path = ../../../../SIFloatingCollection; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +68,7 @@
 		24756D021B7F3F03004C8AF5 = {
 			isa = PBXGroup;
 			children = (
+				4BDF483528D0137B00BFA5BE /* SIFloatingCollection */,
 				24756D0D1B7F3F03004C8AF5 /* Example */,
 				24756D231B7F3F03004C8AF5 /* ExampleTests */,
 				24756D0C1B7F3F03004C8AF5 /* Products */,

@@ -8,6 +8,8 @@ To get animations, logic and almost exact physics as Apple Music has you can use
 
 ![Preview](http://media.giphy.com/media/3oEdv8UHKz9l788J4Q/giphy.gif)
 
+**CocoaPods**
+
 ## Installation for Swift 3
 
 [CocoaPods](http://cocoapods.org)
@@ -21,3 +23,7 @@ pod 'SIFloatingCollection'
 ```ruby
 pod 'SIFloatingCollection', '2.1'
 ```
+**Swift Package Manager**
+
+* File > Swift Packages > Add Package Dependency
+* Add `https://github.com/ProudOfZiggy/SIFloatingCollection_Swift.git`
